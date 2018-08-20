@@ -1,3 +1,5 @@
+using Random
+
 function quickSort(bottom, top, sort_list)
 
     if bottom >= top
@@ -51,6 +53,6 @@ function main()
 
 end
 
-if contains(@__FILE__, PROGRAM_FILE)
+if occursin(PROGRAM_FILE, @__FILE__)
     main()
 end
