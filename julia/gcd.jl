@@ -1,22 +1,13 @@
 using Printf
 
-mutable struct queue
-    data
-    queue_first::Int
-    queue_last::Int
-    queue_max::Int
-    queue_empty::Int
-    queue() = new()
-end
-
-function gcd(a, b)
+function single_gcd(a, b)
 
   i = a
   while i > 0
     if a % i == 0 && b % i == 0
       break
     end
-    i=i+1
+    i=i-1
   end
   return i
 
@@ -26,11 +17,11 @@ function multi_gcd(n, num_list)
 
   # n == 1 (数が２つしかない)の場合は, 普通にgcdを呼ぶだけ
   if n == 1
-    return gcd(num_list[1], num_list[2])
+    return single_gcd(num_list[1], num_list[2])
   end
 
   # n > 1の場合は, num_list[n]と, num_list[1]...num_list[n-1]のgcdを呼び出す
-  return gcd(num_list[n], multi_gcd(n-1, num_list))
+  return single_gcd(num_list[n], multi_gcd(n-1, num_list))
 
 end
 
