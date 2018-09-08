@@ -1,4 +1,5 @@
 using Random
+using Printf
 
 # リストの要素(ノード)を表す構造体
 mutable struct tagTreeNode
@@ -9,45 +10,41 @@ mutable struct tagTreeNode
 end
 
 function createNewNode(num, node_list)
-  node_new = tagTreeNode()
 
-  # 新しいノードを作成して, 初期化する
-  if node_new = nothing
-    return false
-  end
+  node_new = tagTreeNode()
   node_new.left = nothing
   node_new.right = nothing
   node_new.value = num
 
-  push!(node_list, node_new)
-
   return node_new
 end
 
-function insertTree(num, node, root_node, node_list)
+function insertTree(num, node, node_list)
 
   # １つも挿入されていない場合
-  if node == nothing
-    root_node = createNewNode(num)
+  if length(node_list) == 0
+    node = createNewNode(num, node_list)
+    push!(node_list, node)
     return
   end
 
   if node.value > num
-  # numが現在のnodeの値よりも小さい場合
-
+    # numが現在のnodeの値よりも小さい場合
     if node.left != nothing
-      insertTree(num,  node.left)
+      insertTree(num,  node.left, node_list)
     else
       # 左側に追加する
       node.left = createNewNode(num, node_list)
+      push!(node_list, node.left)
     end
   else
-  # numが現在のnodeの値位以上の場合
+    # numが現在のnodeの値位以上の場合
     if node.right != nothing
-      insertTree(num, node.right)
+      insertTree(num, node.right, node_list)
     else
       # 右側に追加する
       node.right = createNewNode(num, node_list)
+      push!(node_list, node.right)
     end
   end
 
@@ -158,8 +155,65 @@ function deleteTree(val, root_node)
     return true
 end
 
+function printTree(depth,  node)
+
+  if node == nothing
+    return
+  end
+
+  printTree(depth + 1, node.left)
+  for i in 1:depth
+    @printf "   "
+  end
+  @printf "%d\n" node.value
+  printTree(depth + 1, node.right)
+
+end
+
 function main()
 
+  root_node = nothing
+  node_list = []
+
+  rng = MersenneTwister(1234)
+  for i in 1:10
+    insertTree(rand(rng, Vector(1:100)), root_node, node_list)
+    root_node = node_list[1]
+  end
+
+  while true
+
+    printTree(0, root_node)
+    @printf "実行する操作のタイプを入力してください. \n 1: 追加\t 2: 検索\t 3:削除\t それ以外: 終了>  "
+    action = parse(Int, readline())
+
+    if action == 1
+      @printf "1-100の範囲で, 追加する数字を入力してください:"
+      i = parse(Int, readline())
+      if i < 1 || i > 100
+        continue
+      end
+      insertTree(i, root_node, node_list)
+    elseif action == 2
+      @printf "検索する数字を入力してください:"
+      i = parse(Int, readline())
+      if findValue(root_node, i) != nothing
+        @printf "%dを発見しました\n" i
+      else
+        @printf "%dは見つかりませんでした\n" i
+      end
+    elseif action == 3
+      @printf "削除する数字を入力してください:"
+      i = parse(Int, readline())
+      if deleteTree(i, root_node) == true
+        @printf "%dを削除しました\n" i
+      else
+        @printf "%dは見つかりませんでした\n" i
+      end
+    else
+      return true
+    end
+  end
 end
 
 if occursin(PROGRAM_FILE, @__FILE__)
