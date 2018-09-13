@@ -10,7 +10,7 @@ end
 
 # ハッシュ表
 mutable struct hashTable
-    data # 要検討. リストにする？
+    data
     size::Int
     hashTable() = new()
 end
@@ -24,7 +24,7 @@ function makeHash2(str,  hashmax)
     if weight > 7
       weight = 0
     end
-    hash = hash + parse(Int, str[n+1])^(16*weight)
+    hash = hash + Int(str[n+1])^(16*weight)
 
     n = n + 1
     weight = weight + 1
@@ -39,9 +39,9 @@ function reHash(hashtable, firsthash)
 
   # firstvalからk^2だけ後ろにある空き位置を探す. "k>ハッシュ表サイズの半分"となったら,  それ以降の探索はムダ.
 
-  for k in 1:Int(hashtable.size/2)
+  for k in 1:round(Int,  hashtable.size/2)
     hashval = (firsthash + k^2) % hashtable.size
-    if hashtable.data[hashval] == nothing
+    if isassigned(hashtable.data, hashval) == true
       return hashval
     end
   end
@@ -58,7 +58,7 @@ function addDataToMap(hashtable, newdata)
   hashval = makeHash2(newdata.english, hashtable.size)
 
   # もしもhashの位置がすでに埋まっていたら, 再ハッシュを行う
-  if hashtable.data[hashval] != nothing
+  if isassigned(hashtable.data, hashval) != true
     hashval = reHash(hashtable, hashval)
 
     # 再ハッシュ結果が-1であれば, 空き位置が見つからなかった (マップが満杯)
@@ -78,13 +78,14 @@ end
 function getDataFromMap(hashtable, key)
 
     # 探索を開始するハッシュ値を求める
-    hashval = MakeHash2(key, hashtable.size)
+    hashval = makeHash2(key, hashtable.size)
 
     # その位置から順番に，keyと同じ値をもつデータが現れるまで探索を行う
-    for k in 0:Int(hashtable.size/2)
-        word = hashtable.data[(hashval + k * k) % hashtable.size]
-        if word != nothing
-            if cmp(key, word->english) == 0
+    for k in 0:round(Int, hashtable.size/2)
+
+        if isassigned(hashtable.data, (hashval + k * k) % hashtable.size) == true
+            word = hashtable.data[(hashval + k * k) % hashtable.size]
+            if cmp(key, word.english) == 0
                 return word.japanese
             end
         end
@@ -104,9 +105,9 @@ function deleteDataFromMap(hashtable, key)
     # その位置から順番に，keyと同じ値をもつデータが現れるまで探索を行う
     for k in 0:Int(hashtable->size/2)
         word = hashtable->data[(hashval + k * k) % hashtable->size]
-        if word != nothing
+        if isassigned(word) == true
             if cmp(key, word.english) == 0
-                hashtable->data[(hashval + k * k) % hashtable.size] = nothing
+                hashtable->data[(hashval + k * k) % hashtable.size] = nothing # undefに戻したいんだが...
                 # ハッシュテーブルから取り除いたデータを返す
                 return word
             end
@@ -116,14 +117,16 @@ function deleteDataFromMap(hashtable, key)
     # ハッシュ表サイズの半分に相当する回数探し続けても
     # 見つからない場合は，該当するデータがハッシュ表のなかに
     # ないことを意味する
-    return nothing
+    return false
 end
 
 # ハッシュテーブルを指定したサイズに初期化する
 function initHashTable(hashtable, size)
     hashtable.data = Array{wordSet}(undef, size)
+    for i in 1:length(hashtable.data)
+      hashtable.data[i] = wordSet()
+    end
     hashtable.size = size
-
 end
 
 #=
@@ -137,7 +140,7 @@ end
 # hashtable中の全データを表示する（単なる表示用）
 function printAllData(hashtable)
     for n in 1:hashtable.size
-        if hashtable.data[n] != nothing
+        if isassigned(hashtable.data, n) == true
             @printf "%d:\t%s\t%s\n" n hashtable.data[n].english hashtable.data[n].japanese
         end
     end
@@ -178,10 +181,11 @@ function main()
         addDataToMap(hash_table, words[n])
     end
 
+    n = 1
     while n != 0
 
         @printf "どの操作を行いますか?（1:検索 2:削除 3:全表示 0:終了）\n>"
-        buf = paprse(Int, readline())
+        buf = parse(Int, readline())
         if buf == 1 # 検索
             @printf "検索する英単語を入力してください："
             key = readline()
