@@ -12,7 +12,7 @@ end
 mutable struct hashTable
     data # 要検討. リストにする？
     size::Int
-    hashData() = new()
+    hashTable() = new()
 end
 
 # 文字列のASCIIコードに重率を掛けてハッシュ値を生成
@@ -84,7 +84,7 @@ function getDataFromMap(hashtable, key)
     for k in 0:Int(hashtable.size/2)
         word = hashtable.data[(hashval + k * k) % hashtable.size]
         if word != nothing
-            if cmp(key, word->english == 0
+            if cmp(key, word->english) == 0
                 return word.japanese
             end
         end
@@ -145,18 +145,15 @@ end
 
 function main()
 
-mutable struct wordSet
-    english::String
-    japanese::String
-    wordSet() = new()
-end
-
     hash_table = hashTable()
     word_found = wordSet()
 
-    #words = Array{wordSet}(undef,n)
-    #words = Array{wordSet,1}(undef,n)
-    words = Vector{wordSet}(5)
+    #words = Array{wordSet}(undef, 5)
+    #words = Array{wordSet,1}(undef, 5)
+    words = Vector{wordSet}(undef, 5)
+    for i in 1:length(words)
+      words[i] = wordSet()
+    end
 
     words[1].english = "dolphin"
     words[1].japanese = "イルカ"
@@ -184,7 +181,6 @@ end
     while n != 0
 
         @printf "どの操作を行いますか?（1:検索 2:削除 3:全表示 0:終了）\n>"
-        scanf("%d", &n);
         buf = paprse(Int, readline())
         if buf == 1 # 検索
             @printf "検索する英単語を入力してください："
