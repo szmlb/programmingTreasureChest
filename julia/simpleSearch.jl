@@ -11,14 +11,16 @@ function simpleSearch(text, pattern)
         @printf "%s \n" pattern
 
         # パターンの先頭から比較を始める
-        for j in 1:length(pattern)
+        j = 1
+        while j < length(pattern) + 1
 
-            if pattern[i+j-1] != text[j]
+            if pattern[j] != text[i+j-1]
                 break              # 一致しなかった
             end
 
+          j = j + 1
         end
-        if j == length(pattern)        # 一致した
+        if j == length(pattern) + 1        # 一致した
             return text;
         end
 
