@@ -1,18 +1,18 @@
 using Printf
 
-function simpleSearch(text, pattern)
+function kmpSearch(text, pattern)
 
     # まずkmpの検索に必要な情報を集め, テーブルとして保存する
-    table = Array{Int}(under, length(pattern))
+    table = Array{Int}(undef, length(pattern)+1)
     text_index = 2
     pattern_index = 1
-    while text_index < length(pattern) + 1
+    while text_index < length(pattern)+1
       if pattern[text_index] == pattern[pattern_index]
         # 一致したら再検索はpattern_index文字から始めれば良い
         text_index += 1
         pattern_index += 1
         table[text_index] = pattern_index
-      else if pattern_index == 1
+      elseif pattern_index == 1
         # パターン一文字目で不一致ならば, 再検索は先頭から
         text_index += 1
         table[text_index] = 1
@@ -25,15 +25,15 @@ function simpleSearch(text, pattern)
 
     text_index = 1
     pattern_index = 1
-    while text_index < length(text)-length(pattern)+1
+    while text_index < length(text) + 1
         # わかりやすいように，いま何を比較しているか表示
         @printf "    本文:%s \nパターン:" text
         for j = 1:text_index-1
             @printf " "
         end
-        @printf "%s \n" pattern
+        @printf "%s \n" pattern[pattern_index]
 
-        if pattern[pattern_index] != text[text_index]
+        if pattern[pattern_index] == text[text_index]
           # テキストとパターンが一致していれば, 一文字ずつ比較を続ける
           text_index += 1
           pattern_index += 1
@@ -53,6 +53,8 @@ function simpleSearch(text, pattern)
 
     end
 
+    return false
+
 end
 
 function main()
@@ -60,7 +62,7 @@ function main()
     original_text = "a eighty-eighty-eighth key"
     original_pattern = "eighty-eighth"
 
-    result = simpleSearch(original_text, original_pattern)
+    result = kmpSearch(original_text, original_pattern)
     if result == false
         @printf "見つかりませんでした\n"
     else
